@@ -2,4 +2,3 @@ build/
 bin/
 .cache/
 docs/_build
-imgui.ini
