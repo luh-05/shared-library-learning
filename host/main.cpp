@@ -1,34 +1,19 @@
-#include <dlfcn.h>
-#include <iostream>
+#include <interface.hpp>
+#include <plugin.hpp>
 #include <print>
 
 int main() {
-  // Open library
-  void *handle = dlopen("./bin/debug/lib/libplugin.so", RTLD_NOW);
+  // load plugin
+  auto plugin = Plugin::LoadPlugin("./bin/debug/lib/libplugin.so");
 
-  // Check if library loaded
-  if (!handle) {
-    std::println(std::cerr, "Library not found!");
-    return 1;
-  }
+  // test behavior
+  auto t = new TextProcessor(3);
+  t->SetBehavior(plugin->LoadBehavior(t->GetContext()));
 
-  // Define function pointer type according to C ABI
-  using Hello = int (*)();
+  std::string text = "Hello World";
+  std::string out = t->Execute(text);
 
-  // Load function as Hello
-  auto hello = reinterpret_cast<Hello>(dlsym(handle, "hello"));
-
-  // Check if hello loaded
-  if (!hello) {
-    std::print(std::cerr, "Function 'hello' not found!");
-    return 1;
-  }
-
-  // print hello
-  std::println("'hello' returned {}", hello());
-
-  // close library
-  dlclose(handle);
+  std::println("'{}' -> '{}'", text, out);
 
   return 0;
 }
