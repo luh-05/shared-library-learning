@@ -8,7 +8,7 @@ template <class PluginType> class BehaviorHandle;
 class TextProcessor {
 public:
   typedef struct TextProcessorContext {
-    uint32_t x = 0;
+    uint32_t x;
   } TextProcessorContext;
 
   std::unique_ptr<TextProcessorContext> ctx;

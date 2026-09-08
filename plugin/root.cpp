@@ -27,7 +27,7 @@ auto GetContext() {
 
 extern "C" size_t behavior_len(const char *str) {
   auto ctx = GetContext();
-  return (strlen(str) * (ctx->x)) + 1;
+  return (strlen(str) * (ctx->x));
 }
 
 extern "C" void behavior(const char *str, char *out) {
@@ -35,9 +35,11 @@ extern "C" void behavior(const char *str, char *out) {
   std::transform(s.begin(), s.end(), s.begin(),
                  [](unsigned char c) { return std::toupper(c); });
   auto ctx = GetContext();
+
+  auto f = std::string(s);
   for (size_t i = 0; i < ctx->x - 1; i++) {
-    s += s;
+    f += s;
   }
 
-  strcpy(out, s.c_str());
+  strcpy(out, f.c_str());
 }
