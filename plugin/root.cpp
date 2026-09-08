@@ -4,23 +4,40 @@
 #include <cctype>
 #include <cstddef>
 #include <cstdlib>
+#include <interface.hpp>
 #include <string>
 
-extern "C" size_t behavior_len(const char *str) { return strlen(str) + 1; }
+Behavior *b;
 
-extern "C" void behavior(const char *str, char *out) {
-  auto s = std::string(str);
-  std::transform(s.begin(), s.end(), s.begin(),
-                 [](unsigned char c) { return std::toupper(c); });
-
-  strcpy(out, s.c_str());
-}
+extern "C" size_t behavior_len(const char *str);
+extern "C" void behavior(const char *str, char *out);
 
 extern "C" Behavior *Load() {
-  Behavior *b = static_cast<Behavior *>(std::malloc(sizeof(Behavior)));
+  b = static_cast<Behavior *>(std::malloc(sizeof(Behavior)));
   b->op = behavior;
   b->opl = behavior_len;
   return b;
 }
 
 extern "C" void Unload(Behavior *b) { free(b); }
+
+auto GetContext() {
+  return reinterpret_cast<TextProcessor::TextProcessorContext *>(b->context);
+}
+
+extern "C" size_t behavior_len(const char *str) {
+  auto ctx = GetContext();
+  return (strlen(str) * (ctx->x)) + 1;
+}
+
+extern "C" void behavior(const char *str, char *out) {
+  auto s = std::string(str);
+  std::transform(s.begin(), s.end(), s.begin(),
+                 [](unsigned char c) { return std::toupper(c); });
+  auto ctx = GetContext();
+  for (size_t i = 0; i < ctx->x - 1; i++) {
+    s += s;
+  }
+
+  strcpy(out, s.c_str());
+}

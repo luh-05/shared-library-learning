@@ -13,6 +13,7 @@ extern "C" {
 typedef void (*Operation)(const char *, char *);
 typedef size_t (*OperationLen)(const char *);
 typedef struct Behavior {
+  void *context;
   Operation op;
   OperationLen opl;
 } Behavior;

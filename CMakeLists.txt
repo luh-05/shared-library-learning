@@ -13,15 +13,15 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG   ${PROJECT_SOURCE_DIR}/bin/debug/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${PROJECT_SOURCE_DIR}/bin/release/lib)
 
 # ABI
-add_library(plugin_abi INTERFACE)
-target_include_directories(plugin_abi
+add_library(plugin_interface INTERFACE)
+target_include_directories(plugin_interface
   INTERFACE
-    ./plugin_abi
+    ./plugin_interface
 )
 
 # C library that will fail to build when c++ features are present in the ABI
 add_library(abi_header_check STATIC abi_check.c)
-target_link_libraries(abi_header_check PRIVATE plugin_abi)
+target_link_libraries(abi_header_check PRIVATE plugin_interface)
 
 set_target_properties(abi_header_check PROPERTIES
     C_STANDARD 11
@@ -36,13 +36,13 @@ endif()
 add_library(plugin SHARED plugin/root.cpp)
 target_link_libraries(plugin
   PRIVATE
-    plugin_abi
+    plugin_interface
 )
 
-add_executable(host host/main.cpp)
+add_executable(host host/main.cpp host/interface.cpp)
 target_link_libraries(host
   PRIVATE
-    plugin_abi
+    plugin_interface
 )
 target_include_directories(host
   PRIVATE
