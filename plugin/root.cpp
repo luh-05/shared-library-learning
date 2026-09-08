@@ -16,9 +16,11 @@ extern "C" void behavior(const char *str, char *out) {
   strcpy(out, s.c_str());
 }
 
-extern "C" Behavior *Get() {
+extern "C" Behavior *Load() {
   Behavior *b = static_cast<Behavior *>(std::malloc(sizeof(Behavior)));
   b->op = behavior;
   b->opl = behavior_len;
   return b;
 }
+
+extern "C" void Unload(Behavior *b) { free(b); }

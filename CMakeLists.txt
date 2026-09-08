@@ -44,3 +44,7 @@ target_link_libraries(host
   PRIVATE
     plugin_abi
 )
+target_include_directories(host
+  PRIVATE
+   ./host
+)
