@@ -10,9 +10,11 @@ extern "C" size_t behavior_len(const char *str);
 extern "C" void behavior(const char *str, char *out);
 
 extern "C" Behavior *Load() {
-  b = static_cast<Behavior *>(std::malloc(sizeof(Behavior)));
-  b->op = behavior;
-  b->opl = behavior_len;
+  if (!b) {
+    b = static_cast<Behavior *>(std::malloc(sizeof(Behavior)));
+    b->op = behavior;
+    b->opl = behavior_len;
+  }
   return b;
 }
 
