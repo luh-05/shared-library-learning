@@ -3,6 +3,7 @@
 #include <memory>
 #include <stdint.h>
 #include <string>
+
 template <class PluginType> class BehaviorHandle;
 
 class TextProcessor {
@@ -10,6 +11,7 @@ public:
   typedef struct TextProcessorContext {
     uint32_t x;
   } TextProcessorContext;
+  using PluginHandle = std::unique_ptr<BehaviorHandle<TextProcessorContext>>;
 
   std::unique_ptr<TextProcessorContext> ctx;
 
@@ -17,11 +19,10 @@ public:
 
   auto GetContext() -> TextProcessorContext * { return this->ctx.get(); }
 
-  auto SetBehavior(std::unique_ptr<BehaviorHandle<TextProcessorContext>> b)
-      -> void;
+  auto SetBehavior(PluginHandle b) -> void;
 
   auto Execute(const std::string &in) -> std::string;
 
 private:
-  std::unique_ptr<BehaviorHandle<TextProcessorContext>> behavior;
+  PluginHandle behavior;
 };

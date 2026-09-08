@@ -1,6 +1,5 @@
-#include "interface.hpp"
-#include "plugin.hpp"
-#include <dlfcn.h>
+#include <interface.hpp>
+#include <plugin.hpp>
 #include <print>
 
 int main() {
@@ -9,9 +8,7 @@ int main() {
 
   // test behavior
   auto t = new TextProcessor(3);
-  auto b_handle = plugin->LoadBehavior<TextProcessor::TextProcessorContext>(
-      t->GetContext());
-  t->SetBehavior(std::move(b_handle));
+  t->SetBehavior(plugin->LoadBehavior(t->GetContext()));
 
   std::string text = "Hello World";
   std::string out = t->Execute(text);

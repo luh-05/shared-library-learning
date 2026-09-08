@@ -1,13 +1,12 @@
-#include "interface.hpp"
 #include <abi.h>
-#include <cstdlib>
 #include <dlfcn.h>
 #include <exception>
+#include <interface.hpp>
 #include <iostream>
 #include <memory>
 
 using PluginLoad = Behavior *(*)();
-using PluginUnload = void (*)(Behavior *b);
+using PluginUnload = void (*)();
 struct PluginData {
   void *handle;
   PluginLoad load;
@@ -41,14 +40,14 @@ public:
       std::terminate();
     }
 
-    return std::move(std::make_unique<Plugin>(std::move(data)));
+    return std::make_unique<Plugin>(std::move(data));
   }
 
   template <class PluginType>
   auto LoadBehavior(PluginType *context)
       -> std::unique_ptr<BehaviorHandle<PluginType>> {
     std::shared_ptr<PluginData> d = this->data;
-    return std::move(std::make_unique<BehaviorHandle<PluginType>>(d, context));
+    return std::make_unique<BehaviorHandle<PluginType>>(d, context);
   }
 };
 
@@ -63,7 +62,7 @@ public:
     this->b = this->data->load();
     this->b->context = context;
   }
-  ~BehaviorHandle() { this->data->unload(this->b); }
+  ~BehaviorHandle() { this->data->unload(); }
 
   auto GetBehavior() -> const Behavior * { return this->b; }
 };

@@ -1,9 +1,6 @@
 #include <abi.h>
 #include <algorithm>
 #include <bits/stdc++.h>
-#include <cctype>
-#include <cstddef>
-#include <cstdlib>
 #include <interface.hpp>
 #include <string>
 
@@ -19,7 +16,11 @@ extern "C" Behavior *Load() {
   return b;
 }
 
-extern "C" void Unload(Behavior *b) { free(b); }
+extern "C" void Unload() {
+  if (b) {
+    delete b;
+  }
+}
 
 auto GetContext() {
   return reinterpret_cast<TextProcessor::TextProcessorContext *>(b->context);
