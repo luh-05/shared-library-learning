@@ -1,3 +1,4 @@
+#include "abi.h"
 #include <cstddef>
 #include <dlfcn.h>
 #include <iostream>
@@ -13,36 +14,25 @@ int main() {
     return 1;
   }
 
-  // Define function pointer type according to C ABI
-  using Behavior = void (*)(const char *, char *);
-  using BehaviorLen = size_t (*)(const char *);
+  using PluginGet = Behavior *(*)();
 
-  // Load function as Behavior
-  auto behavior = reinterpret_cast<Behavior>(dlsym(handle, "behavior"));
+  auto plugin_get = reinterpret_cast<PluginGet>(dlsym(handle, "Get"));
 
   // Check if behavior loaded
-  if (!behavior) {
-    std::println(std::cerr, "Behavior not found!");
+  if (!plugin_get) {
+    std::println(std::cerr, "PluginGet not found!");
     return 1;
   }
 
-  // Load function as BehaviorLen
-  auto behavior_len =
-      reinterpret_cast<BehaviorLen>(dlsym(handle, "behavior_len"));
-
-  // Check if behavior_len loaded
-  if (!behavior_len) {
-    std::println(std::cerr, "BehaviorLen not found!");
-    return 1;
-  }
+  auto behavior = plugin_get();
 
   // print behavior("Hello World")
   std::string text = "Hello World";
-  size_t outlen = behavior_len(text.data());
+  size_t outlen = behavior->opl(text.data());
   std::string out = std::string();
   out.resize(outlen);
-  behavior(text.data(), out.data());
-  std::println("behavior('{}') returned '{}'", text, out);
+  behavior->op(text.data(), out.data());
+  std::println("'{}' -> '{}'", text, out);
 
   // close library
   dlclose(handle);

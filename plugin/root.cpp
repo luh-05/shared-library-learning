@@ -1,10 +1,12 @@
+#include <abi.h>
 #include <algorithm>
 #include <bits/stdc++.h>
 #include <cctype>
 #include <cstddef>
+#include <cstdlib>
 #include <string>
 
-extern "C" size_t behavior_len(const char *str) { return strlen(str); }
+extern "C" size_t behavior_len(const char *str) { return strlen(str) + 1; }
 
 extern "C" void behavior(const char *str, char *out) {
   auto s = std::string(str);
@@ -12,4 +14,11 @@ extern "C" void behavior(const char *str, char *out) {
                  [](unsigned char c) { return std::toupper(c); });
 
   strcpy(out, s.c_str());
+}
+
+extern "C" Behavior *Get() {
+  Behavior *b = static_cast<Behavior *>(std::malloc(sizeof(Behavior)));
+  b->op = behavior;
+  b->opl = behavior_len;
+  return b;
 }
