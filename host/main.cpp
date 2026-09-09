@@ -8,7 +8,8 @@ int main() {
 
   // test behavior
   auto t = new TextProcessor(3);
-  t->SetBehavior(plugin->LoadBehavior(t->GetContext()));
+  auto b = plugin->LoadBehavior(t->GetContext(), "foo");
+  t->SetBehavior(std::move(b));
 
   std::string text = "Hello World";
   std::string out = t->Execute(text);

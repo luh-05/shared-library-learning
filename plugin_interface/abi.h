@@ -10,12 +10,16 @@
 extern "C" {
 #endif
 
-typedef void (*Operation)(const char *, char *);
-typedef size_t (*OperationLen)(const char *);
-typedef struct Behavior {
-  void *context;
+typedef void (*Operation)(void *, const char *, char *);
+typedef size_t (*OperationLen)(void *, const char *);
+
+typedef struct Impl {
   Operation op;
   OperationLen opl;
+} Impl;
+typedef struct Behavior {
+  void *context;
+  Impl *impl;
 } Behavior;
 
 #ifdef __cplusplus

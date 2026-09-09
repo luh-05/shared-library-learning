@@ -1,48 +1,87 @@
 #include <abi.h>
 #include <algorithm>
 #include <bits/stdc++.h>
+#include <cstring>
 #include <interface.hpp>
 #include <string>
 
-Behavior *b;
-
-extern "C" size_t behavior_len(const char *str);
-extern "C" void behavior(const char *str, char *out);
-
-extern "C" Behavior *Load() {
-  if (!b) {
-    b = static_cast<Behavior *>(std::malloc(sizeof(Behavior)));
-    b->op = behavior;
-    b->opl = behavior_len;
-  }
-  return b;
+auto GetContext(void *ctx) -> TextProcessor::TextProcessorContext * {
+  return reinterpret_cast<TextProcessor::TextProcessorContext *>(ctx);
 }
 
-extern "C" void Unload() {
-  if (b) {
-    delete b;
-  }
+extern "C" size_t foo_len(void *ctx, const char *str) {
+  auto c = GetContext(ctx);
+
+  return (strlen(str) * (c->x));
 }
 
-auto GetContext() {
-  return reinterpret_cast<TextProcessor::TextProcessorContext *>(b->context);
-}
+extern "C" void foo(void *ctx, const char *str, char *out) {
+  auto c = GetContext(ctx);
 
-extern "C" size_t behavior_len(const char *str) {
-  auto ctx = GetContext();
-  return (strlen(str) * (ctx->x));
-}
-
-extern "C" void behavior(const char *str, char *out) {
   auto s = std::string(str);
   std::transform(s.begin(), s.end(), s.begin(),
                  [](unsigned char c) { return std::toupper(c); });
-  auto ctx = GetContext();
 
   auto f = std::string(s);
-  for (size_t i = 0; i < ctx->x - 1; i++) {
+  for (size_t i = 0; i < c->x - 1; i++) {
     f += s;
   }
 
   strcpy(out, f.c_str());
+}
+
+extern "C" size_t bar_len(void *ctx, const char *str) {
+  auto c = GetContext(ctx);
+
+  return (strlen(str) * (c->x));
+}
+
+extern "C" void bar(void *ctx, const char *str, char *out) {
+  auto c = GetContext(ctx);
+
+  auto s = std::string(str);
+  std::transform(s.begin(), s.end(), s.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+
+  auto f = std::string(s);
+  for (size_t i = 0; i < c->x - 1; i++) {
+    f += s;
+  }
+
+  strcpy(out, f.c_str());
+}
+
+Impl *CreateFooImpl() {
+  auto impl = static_cast<Impl *>(std::malloc(sizeof(Impl)));
+  impl->op = foo;
+  impl->opl = foo_len;
+  return impl;
+}
+
+Impl *CreateBarImpl() {
+  auto impl = static_cast<Impl *>(std::malloc(sizeof(Impl)));
+  impl->op = bar;
+  impl->opl = bar_len;
+  return impl;
+}
+
+extern "C" Behavior *Load(const char *impl_name) {
+  Impl *impl;
+  auto impl_string = std::string(impl_name);
+  if (impl_string == "foo") {
+    impl = CreateFooImpl();
+  } else if (impl_string == "bar") {
+    impl = CreateBarImpl();
+  } else {
+    return nullptr;
+  }
+  Behavior *b = static_cast<Behavior *>(std::malloc(sizeof(Behavior)));
+  b->impl = impl;
+
+  return b;
+}
+
+extern "C" void Unload(Behavior *b) {
+  delete b->impl;
+  delete b;
 }

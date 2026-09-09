@@ -11,12 +11,11 @@ auto TextProcessor::SetBehavior(PluginHandle b) -> void {
 }
 
 auto TextProcessor::Execute(const std::string &in) -> std::string {
-  const Behavior *b = this->behavior->GetBehavior();
+  const auto b = this->behavior->GetBehavior();
 
-  size_t outlen = b->opl(in.data());
+  size_t outlen = this->behavior->behavior_len(in);
   std::string out = std::string();
   out.resize(outlen);
-  b->op(in.data(), out.data());
-
+  this->behavior->behavior(in, out);
   return out;
 }

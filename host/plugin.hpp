@@ -5,8 +5,10 @@
 #include <iostream>
 #include <memory>
 
-using PluginLoad = Behavior *(*)();
-using PluginUnload = void (*)();
+#pragma once
+
+using PluginLoad = Behavior *(*)(const char *impl_name);
+using PluginUnload = void (*)(Behavior *);
 struct PluginData {
   void *handle;
   PluginLoad load;
@@ -44,10 +46,10 @@ public:
   }
 
   template <class PluginType>
-  auto LoadBehavior(PluginType *context)
+  auto LoadBehavior(PluginType *context, std::string impl_name)
       -> std::unique_ptr<BehaviorHandle<PluginType>> {
     std::shared_ptr<PluginData> d = this->data;
-    return std::make_unique<BehaviorHandle<PluginType>>(d, context);
+    return std::make_unique<BehaviorHandle<PluginType>>(d, context, impl_name);
   }
 };
 
@@ -57,12 +59,26 @@ private:
   Behavior *b;
 
 public:
-  BehaviorHandle(std::shared_ptr<PluginData> data, PluginType *context)
+  BehaviorHandle(std::shared_ptr<PluginData> data, PluginType *context,
+                 std::string impl_name)
       : data(data) {
-    this->b = this->data->load();
+    this->b = this->data->load(impl_name.data());
+    if (!this->b) {
+      std::println(std::cerr, "Implementation '{}' could not be found!",
+                   impl_name);
+      std::terminate();
+    }
     this->b->context = context;
   }
-  ~BehaviorHandle() { this->data->unload(); }
+  ~BehaviorHandle() { this->data->unload(this->b); }
 
   auto GetBehavior() -> const Behavior * { return this->b; }
+
+  size_t behavior_len(std::string_view text) {
+    return this->b->impl->opl(this->b->context, text.data());
+  }
+
+  void behavior(std::string_view in, std::string &out) {
+    this->b->impl->op(this->b->context, in.data(), out.data());
+  }
 };
