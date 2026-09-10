@@ -9,6 +9,11 @@ auto GetContext(void *ctx) -> TextProcessor::TextProcessorContext * {
   return reinterpret_cast<TextProcessor::TextProcessorContext *>(ctx);
 }
 
+class InternalImpl {
+  TextProcessor::TextProcessorContext *ctx;
+  size_t op_len(const char *) {}
+};
+
 extern "C" size_t foo_len(void *ctx, const char *str) {
   auto c = GetContext(ctx);
 
@@ -64,6 +69,8 @@ Impl *CreateBarImpl() {
   impl->opl = bar_len;
   return impl;
 }
+
+class ImplStore {};
 
 extern "C" Behavior *Load(const char *impl_name) {
   Impl *impl;
